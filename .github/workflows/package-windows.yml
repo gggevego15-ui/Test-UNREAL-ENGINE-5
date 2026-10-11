@@ -1,0 +1,83 @@
+name: Package UE5 Windows EXE
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-windows:
+    # Requires a remote Windows runner with Unreal Engine 5.5 installed.
+    # The runner can be a cloud VM; it does not need to be the user's PC.
+    runs-on: [self-hosted, Windows, X64, ue5-5.5]
+    timeout-minutes: 180
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Locate Unreal Engine 5.5
+        shell: pwsh
+        run: |
+          $candidateRoots = @(
+            $env:UE_ROOT,
+            'C:\Program Files\Epic Games\UE_5.5',
+            'D:\Epic Games\UE_5.5'
+          ) | Where-Object { $_ -and $_.Trim() }
+
+          $engineRoot = $null
+          foreach ($candidate in $candidateRoots) {
+            if (Test-Path (Join-Path $candidate 'Engine\Build\BatchFiles\RunUAT.bat')) {
+              $engineRoot = (Resolve-Path $candidate).Path
+              break
+            }
+          }
+
+          if (-not $engineRoot) {
+            Write-Error 'Unreal Engine 5.5 was not found. Install UE 5.5 on this remote runner and set the UE_ROOT repository variable if it is in a custom location.'
+          }
+
+          $uat = Join-Path $engineRoot 'Engine\Build\BatchFiles\RunUAT.bat'
+          "UE_ROOT=$engineRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "UE_UAT=$uat" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Using Unreal Engine at: $engineRoot"
+
+      - name: Validate project descriptor
+        shell: pwsh
+        run: |
+          $project = Get-Content 'TestUE5.uproject' -Raw | ConvertFrom-Json
+          if ($project.EngineAssociation -ne '5.5') {
+            Write-Error "Expected EngineAssociation 5.5, got '$($project.EngineAssociation)'"
+          }
+          if (-not (Test-Path 'Source/TestUE5.Target.cs')) {
+            Write-Error 'Missing Source/TestUE5.Target.cs'
+          }
+
+      - name: Build, cook and package Windows game
+        shell: pwsh
+        run: |
+          $projectPath = (Resolve-Path 'TestUE5.uproject').Path
+          $archivePath = Join-Path $env:GITHUB_WORKSPACE 'artifacts\Windows'
+          New-Item -ItemType Directory -Force -Path $archivePath | Out-Null
+
+          & $env:UE_UAT BuildCookRun "-project=$projectPath" -noP4 -platform=Win64 -clientconfig=Shipping -build -cook -stage -pak -archive "-archivedirectory=$archivePath" -utf8output
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Unreal Automation Tool failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Verify packaged executable
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem 'artifacts\Windows' -Filter '*.exe' -Recurse -File | Select-Object -First 1
+          if (-not $exe) {
+            Write-Error 'Packaging finished without an .exe. Check the Unreal Automation Tool log above.'
+          }
+          Write-Host "Packaged executable found: $($exe.FullName)"
+
+      - name: Upload packaged Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestUE5-Windows-Shipping
+          path: artifacts/Windows/**
+          if-no-files-found: error
+          retention-days: 14
