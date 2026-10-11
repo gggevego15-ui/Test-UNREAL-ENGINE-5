@@ -1,0 +1,13 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.5",
+  "Category": "Games",
+  "Description": "UE5 first-person controller prototype",
+  "Modules": [
+    {
+      "Name": "TestUE5",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
