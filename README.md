@@ -1,27 +1,37 @@
 # TestUE5 — first-person prototype
 
-A minimal Unreal Engine 5.5 C++ starter project.
+**Active project:** Unity 6 LTS port in [UnityProject](UnityProject/). The original Unreal Engine 5.5 source remains in the repository as a backup/reference; it has not been deleted.
 
-## Controls
-- **W / A / S / D** — move
-- **Mouse** — look around
-- **Space** — jump
+## Unity prototype
 
-## Test arena
-The game mode creates a small test arena at runtime so the project can be tested without committing a binary `.umap` file. It spawns a concrete-tinted floor, charcoal perimeter walls, colored jump platforms, a player start, a warm directional sun, sky atmosphere, skylight, and subtle fog. These use Unreal's built-in Basic Shapes mesh/material with runtime tint and roughness parameters. The configured startup map is Unreal's built-in `/Engine/Maps/Entry`.
+The Unity port recreates the original first-person test arena:
+- WASD movement, mouse look, Space to jump, and Escape to release the mouse cursor.
+- CharacterController collision and gravity.
+- Procedural first-person sleeve/hand placeholders with movement bob and sway.
+- Concrete floor, perimeter walls, four colored raised platforms, warm directional light, fill light, and subtle fog.
+- A 1280×720 Windows player build.
 
-Arena generation lives in `Source/TestUE5/TestUE5GameMode.cpp`. See [Docs/TEST_ARENA.md](Docs/TEST_ARENA.md).
+### Open locally
 
-## First-person character
-`AFirstPersonTestCharacter` provides first-person movement and camera control. The camera has separate left/right sleeve and hand placeholder meshes, with movement-driven procedural bob/sway. The full-body placeholder is hidden from its own camera to avoid obstructing the view.
+1. Install Unity Hub and Unity **6000.0.58f1** (Unity 6 LTS).
+2. In Unity Hub, click **Add / Open** and select this repository's `UnityProject` folder.
+3. Open the project and let Unity import the scripts/packages.
+4. From the Unity top menu choose **TestUE5 → Generate Test Arena Scene**.
+5. Open `Assets/Scenes/Main.unity` and press Play.
 
-The character is still assembled from Unreal Engine basic cube and sphere meshes. It is not a finished realistic or skinned character. The next step for proper animation is importing a licensed skeletal arms mesh and wiring an Animation Blueprint. See [Docs/FIRST_PERSON_ANIMATION.md](Docs/FIRST_PERSON_ANIMATION.md).
+Controls: **W/A/S/D** move, **mouse** looks, **Space** jumps, **Esc** releases the cursor, and click to lock it again.
 
-## Build status
-- `.github/workflows/validate.yml` checks the source layout and uploads a source ZIP. It does **not** compile the game.
-- `.github/workflows/package-windows.yml` is a packaging workflow for a real Windows Shipping build. It runs only on manual dispatch and requires a Windows self-hosted GitHub Actions runner with **Unreal Engine 5.5 already installed** and the runner label `ue5-5.5`.
-- The runner may be a remote/cloud Windows machine, so Unreal Engine does not need to be installed on the developer's personal PC. However, this repository workflow does not provision that machine or install Unreal Engine automatically.
-- If UE 5.5 is installed in a custom directory, configure the runner's `UE_ROOT` environment variable or repository variable for the workflow's runner environment.
-- After the workflow completes successfully, the packaged game files (including the `.exe`) are uploaded as the `TestUE5-Windows-Shipping` artifact for 14 days.
+## Build a Windows EXE with GitHub Actions
 
-**Important:** the workflow file has been committed, but a runner has not been provisioned or tested from this repository yet. Therefore, no successful executable build is confirmed.
+Workflow: [Build Unity Windows EXE](.github/workflows/unity-windows.yml).
+
+1. In the repository open **Settings → Secrets and variables → Actions → New repository secret**.
+2. Add a repository secret named **UNITY_LICENSE** containing your Unity license file contents. GameCI needs a valid Unity license to run the Editor in CI.
+3. Open **Actions → Build Unity Windows EXE → Run workflow**. A push that changes `UnityProject/**` also triggers the workflow.
+4. When the run succeeds, open the run and download artifact **TestUE5-Unity-Windows**. It contains `TestUE5.exe` and the supporting player data folder.
+
+The workflow has been added, but it has **not yet been confirmed to build successfully**. No EXE is claimed to exist until a successful Actions run and artifact are verified.
+
+## Original Unreal project
+
+The original UE 5.5 files and its packaging workflow remain available for reference. They are not part of the Unity build.
