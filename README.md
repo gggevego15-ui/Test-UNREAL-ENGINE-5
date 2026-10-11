@@ -8,7 +8,7 @@ A minimal Unreal Engine 5.5 C++ starter project.
 - **Space** — jump
 
 ## Test arena
-The game mode creates a small test arena at runtime so the project can be tested without committing a binary `.umap` file. It spawns a floor, perimeter walls, jump platforms, a player start, a directional sun, sky atmosphere, skylight, and light fog. The configured startup map is Unreal's built-in `/Engine/Maps/Entry`.
+The game mode creates a small test arena at runtime so the project can be tested without committing a binary `.umap` file. It spawns a concrete-tinted floor, charcoal perimeter walls, colored jump platforms, a player start, a warm directional sun, sky atmosphere, skylight, and subtle fog. These use Unreal's built-in Basic Shapes mesh/material with runtime tint and roughness parameters. The configured startup map is Unreal's built-in `/Engine/Maps/Entry`.
 
 Arena generation lives in `Source/TestUE5/TestUE5GameMode.cpp`. See [Docs/TEST_ARENA.md](Docs/TEST_ARENA.md).
 
