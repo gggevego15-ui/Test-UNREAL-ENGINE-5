@@ -8,6 +8,10 @@ UCLASS()
 class TESTUE5_API ATestUE5GameMode : public AGameModeBase
 {
     GENERATED_BODY()
+
 public:
     ATestUE5GameMode();
+
+protected:
+    virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 };
