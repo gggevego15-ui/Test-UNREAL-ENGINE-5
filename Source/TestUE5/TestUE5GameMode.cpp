@@ -69,7 +69,7 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
     if (CubeMesh)
     {
         // Main floor: 60 m x 60 m, top surface at Z=0.
-        SpawnTestCube(World, CubeMesh, FVector(0.0f, 0.0f, -50.0f), FVector(600.0f, 600.0f, 1.0f));
+        SpawnTestCube(World, CubeMesh, FVector(0.0f, 0.0f, -50.0f), FVector(60.0f, 60.0f, 1.0f));
 
         // Low perimeter walls to make the test area's edges visible.
         SpawnTestCube(World, CubeMesh, FVector(0.0f, 3000.0f, 100.0f), FVector(600.0f, 1.0f, 3.0f));
@@ -93,7 +93,6 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
         StartParams);
     if (PlayerStart)
     {
-        PlayerStart->SetActorLabel(TEXT("Test Arena Player Start"));
     }
 
     // Physically based sun and sky atmosphere.
@@ -104,7 +103,6 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
         ASkyAtmosphere::StaticClass(), FTransform::Identity, LightParams);
     if (Atmosphere)
     {
-        Atmosphere->SetActorLabel(TEXT("Test Arena Sky Atmosphere"));
     }
 
     ADirectionalLight* Sun = World->SpawnActor<ADirectionalLight>(
@@ -118,7 +116,6 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
         Sun->GetLightComponent()->bAtmosphereSunLight = true;
         Sun->GetLightComponent()->AtmosphereSunLightIndex = 0;
         Sun->GetLightComponent()->SetCastShadows(true);
-        Sun->SetActorLabel(TEXT("Test Arena Sun"));
     }
 
     ASkyLight* SkyLight = World->SpawnActor<ASkyLight>(
@@ -129,7 +126,6 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
         SkyLight->GetLightComponent()->SetIntensity(1.0f);
         SkyLight->GetLightComponent()->SourceType = ESkyLightSourceType::SLS_CapturedScene;
         SkyLight->GetLightComponent()->bRealTimeCapture = true;
-        SkyLight->SetActorLabel(TEXT("Test Arena Sky Light"));
     }
 
     AExponentialHeightFog* Fog = World->SpawnActor<AExponentialHeightFog>(
@@ -139,6 +135,5 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
         Fog->GetComponent()->SetFogDensity(0.003f);
         Fog->GetComponent()->SetFogHeightFalloff(0.2f);
         Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.58f, 0.70f, 0.82f));
-        Fog->SetActorLabel(TEXT("Test Arena Atmospheric Fog"));
     }
 }
