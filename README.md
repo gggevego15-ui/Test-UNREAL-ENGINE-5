@@ -7,12 +7,15 @@ A minimal Unreal Engine 5.5 C++ starter project.
 - **Mouse** — look around
 - **Space** — jump
 
-## First-person character
-`AFirstPersonTestCharacter` provides first-person movement and camera control. The camera now has separate left/right sleeve and hand placeholder meshes, hidden from other viewers and animated with a lightweight movement-driven bob/sway. The full-body placeholder is hidden from its own camera to prevent obstructing the view.
+## Test arena
+The game mode creates a small test arena at runtime so the project can be tested without committing a binary `.umap` file. It spawns a floor, perimeter walls, jump platforms, a player start, a directional sun, sky atmosphere, skylight, and light fog. The configured startup map is Unreal's built-in `/Engine/Maps/Entry`.
 
-The model is still built from Unreal Engine's basic cube and sphere meshes. It is a functional placeholder, not a realistic skinned character. The code now has a `Tick()` animation hook; the next step for proper animation is importing a licensed skeletal arms mesh and wiring an Animation Blueprint. See [`Docs/FIRST_PERSON_ANIMATION.md`](Docs/FIRST_PERSON_ANIMATION.md).
+Arena generation lives in `Source/TestUE5/TestUE5GameMode.cpp`. See [Docs/TEST_ARENA.md](Docs/TEST_ARENA.md).
+
+## First-person character
+`AFirstPersonTestCharacter` provides first-person movement and camera control. The camera has separate left/right sleeve and hand placeholder meshes, with movement-driven procedural bob/sway. The full-body placeholder is hidden from its own camera to avoid obstructing the view.
+
+The character is still assembled from Unreal Engine basic cube and sphere meshes. It is not a finished realistic or skinned character. The next step for proper animation is importing a licensed skeletal arms mesh and wiring an Animation Blueprint. See [Docs/FIRST_PERSON_ANIMATION.md](Docs/FIRST_PERSON_ANIMATION.md).
 
 ## Build status
 The GitHub Actions workflow validates the source layout and uploads a source ZIP. Standard GitHub-hosted Windows runners do not include Unreal Engine, so this workflow cannot compile a playable `.exe` by itself. A real UE build requires an Unreal Engine installation available to the runner, typically a configured self-hosted Windows runner with UE 5.5 installed and licensed.
-
-The project does not yet include a custom `.umap` level or final art assets. Open it in Unreal Editor, create/open a level, add a floor and lighting, then press Play to test the controller.
