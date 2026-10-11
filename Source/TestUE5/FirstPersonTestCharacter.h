@@ -14,6 +14,7 @@ class TESTUE5_API AFirstPersonTestCharacter : public ACharacter
 
 public:
     AFirstPersonTestCharacter();
+    virtual void Tick(float DeltaSeconds) override;
 
 protected:
     virtual void BeginPlay() override;
@@ -30,6 +31,7 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Camera")
     TObjectPtr<UCameraComponent> FirstPersonCamera;
 
+    // Third-person silhouette. Owner does not see these meshes in first person.
     UPROPERTY(VisibleAnywhere, Category="Character Visual")
     TObjectPtr<UStaticMeshComponent> BodyVisual;
 
@@ -47,4 +49,22 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category="Character Visual")
     TObjectPtr<UStaticMeshComponent> RightLegVisual;
+
+    // Camera-attached first-person arms; these are a placeholder rig for later skeletal animation.
+    UPROPERTY(VisibleAnywhere, Category="First Person Arms")
+    TObjectPtr<UStaticMeshComponent> LeftSleeveVisual;
+
+    UPROPERTY(VisibleAnywhere, Category="First Person Arms")
+    TObjectPtr<UStaticMeshComponent> RightSleeveVisual;
+
+    UPROPERTY(VisibleAnywhere, Category="First Person Arms")
+    TObjectPtr<UStaticMeshComponent> LeftHandVisual;
+
+    UPROPERTY(VisibleAnywhere, Category="First Person Arms")
+    TObjectPtr<UStaticMeshComponent> RightHandVisual;
+
+    FVector CameraStartLocation;
+    FVector LeftSleeveStartLocation;
+    FVector RightSleeveStartLocation;
+    float AnimationClock = 0.0f;
 };
