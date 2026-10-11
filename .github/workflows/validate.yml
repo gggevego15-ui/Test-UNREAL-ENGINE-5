@@ -38,7 +38,7 @@ jobs:
           }
 
           $gameMode = Get-Content 'Source/TestUE5/TestUE5GameMode.cpp' -Raw
-          foreach ($token in @('SpawnTestCube', 'APlayerStart', 'ADirectionalLight', 'ASkyAtmosphere', 'ASkyLight', 'AExponentialHeightFog')) {
+          foreach ($token in @('SpawnTestCube', 'APlayerStart', 'ADirectionalLight', 'ASkyAtmosphere', 'ASkyLight', 'AExponentialHeightFog', 'BasicShapeMaterial', 'SetVectorParameterValue', 'Roughness')) {
             if ($gameMode -notmatch [regex]::Escape($token)) {
               Write-Error "Test arena source is missing expected element: $token"
             }
