@@ -32,6 +32,7 @@ AFirstPersonTestCharacter::AFirstPersonTestCharacter()
     HeadVisual->SetRelativeLocation(FVector(0.0f, 0.0f, 59.0f));
     HeadVisual->SetRelativeScale3D(FVector(0.25f, 0.25f, 0.27f));
     HeadVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    HeadVisual->SetOwnerNoSee(true);
     if (SphereMesh.Succeeded()) HeadVisual->SetStaticMesh(SphereMesh.Object);
 
     LeftArmVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftArmVisual"));
