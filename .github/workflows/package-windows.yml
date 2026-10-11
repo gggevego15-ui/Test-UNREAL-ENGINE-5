@@ -11,6 +11,8 @@ jobs:
     # Requires a remote Windows runner with Unreal Engine 5.5 installed.
     # The runner can be a cloud VM; it does not need to be the user's PC.
     runs-on: [self-hosted, Windows, X64, ue5-5.5]
+    env:
+      UE_ROOT: ${{ vars.UE_ROOT }}
     timeout-minutes: 180
     steps:
       - name: Checkout project
