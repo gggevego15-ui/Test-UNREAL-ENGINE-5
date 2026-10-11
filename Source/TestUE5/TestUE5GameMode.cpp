@@ -11,15 +11,24 @@
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerStart.h"
-#include "UObject/ConstructorHelpers.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 
 namespace
 {
+    UMaterialInterface* LoadBasicShapeMaterial()
+    {
+        return LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+    }
+
     AStaticMeshActor* SpawnTestCube(
         UWorld* World,
         UStaticMesh* CubeMesh,
+        UMaterialInterface* BaseMaterial,
         const FVector& Location,
         const FVector& Scale,
+        const FLinearColor& Tint,
+        float Roughness = 0.82f,
         const FRotator& Rotation = FRotator::ZeroRotator)
     {
         if (!World || !CubeMesh)
@@ -42,6 +51,17 @@ namespace
             MeshComponent->SetMobility(EComponentMobility::Static);
             MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
             MeshComponent->SetGenerateOverlapEvents(false);
+
+            if (BaseMaterial)
+            {
+                UMaterialInstanceDynamic* Material = UMaterialInstanceDynamic::Create(BaseMaterial, MeshComponent);
+                if (Material)
+                {
+                    Material->SetVectorParameterValue(TEXT("Color"), Tint);
+                    Material->SetScalarParameterValue(TEXT("Roughness"), Roughness);
+                    MeshComponent->SetMaterial(0, Material);
+                }
+            }
         }
 
         return CubeActor;
@@ -63,47 +83,50 @@ void ATestUE5GameMode::InitGame(const FString& MapName, const FString& Options, 
         return;
     }
 
-    // Build a small playable test arena in code, so the prototype does not depend
-    // on a binary .umap asset being manually created first.
+    // Build a small playable arena using built-in Unreal meshes and material assets.
     UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+    UMaterialInterface* BasicMaterial = LoadBasicShapeMaterial();
     if (CubeMesh)
     {
-        // Main floor: 60 m x 60 m, top surface at Z=0.
-        SpawnTestCube(World, CubeMesh, FVector(0.0f, 0.0f, -50.0f), FVector(60.0f, 60.0f, 1.0f));
+        // Main floor: 60 m x 60 m, top surface at Z=0. Neutral concrete tint.
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(0.0f, 0.0f, -50.0f),
+            FVector(60.0f, 60.0f, 1.0f), FLinearColor(0.34f, 0.36f, 0.38f), 0.9f);
 
-        // Low perimeter walls to make the test area's edges visible.
-        SpawnTestCube(World, CubeMesh, FVector(0.0f, 3000.0f, 100.0f), FVector(600.0f, 1.0f, 3.0f));
-        SpawnTestCube(World, CubeMesh, FVector(0.0f, -3000.0f, 100.0f), FVector(600.0f, 1.0f, 3.0f));
-        SpawnTestCube(World, CubeMesh, FVector(3000.0f, 0.0f, 100.0f), FVector(1.0f, 600.0f, 3.0f));
-        SpawnTestCube(World, CubeMesh, FVector(-3000.0f, 0.0f, 100.0f), FVector(1.0f, 600.0f, 3.0f));
+        // Perimeter walls: charcoal trim with warm safety-color accents at the corners.
+        const FLinearColor WallColor(0.16f, 0.19f, 0.22f);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(0.0f, 3000.0f, 100.0f),
+            FVector(60.0f, 1.0f, 3.0f), WallColor);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(0.0f, -3000.0f, 100.0f),
+            FVector(60.0f, 1.0f, 3.0f), WallColor);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(3000.0f, 0.0f, 100.0f),
+            FVector(1.0f, 60.0f, 3.0f), WallColor);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(-3000.0f, 0.0f, 100.0f),
+            FVector(1.0f, 60.0f, 3.0f), WallColor);
 
-        // A few raised platforms for basic movement/jump testing.
-        SpawnTestCube(World, CubeMesh, FVector(550.0f, 0.0f, 35.0f), FVector(2.5f, 3.0f, 0.7f));
-        SpawnTestCube(World, CubeMesh, FVector(900.0f, 0.0f, 105.0f), FVector(2.0f, 2.5f, 0.7f));
-        SpawnTestCube(World, CubeMesh, FVector(1200.0f, 350.0f, 175.0f), FVector(2.0f, 2.0f, 0.7f));
-        SpawnTestCube(World, CubeMesh, FVector(1500.0f, -350.0f, 245.0f), FVector(2.0f, 2.0f, 0.7f));
+        // Raised platforms use distinct muted colors so their edges are easy to read.
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(550.0f, 0.0f, 35.0f),
+            FVector(2.5f, 3.0f, 0.7f), FLinearColor(0.18f, 0.36f, 0.43f), 0.55f);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(900.0f, 0.0f, 105.0f),
+            FVector(2.0f, 2.5f, 0.7f), FLinearColor(0.56f, 0.35f, 0.16f), 0.58f);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(1200.0f, 350.0f, 175.0f),
+            FVector(2.0f, 2.0f, 0.7f), FLinearColor(0.24f, 0.40f, 0.30f), 0.62f);
+        SpawnTestCube(World, CubeMesh, BasicMaterial, FVector(1500.0f, -350.0f, 245.0f),
+            FVector(2.0f, 2.0f, 0.7f), FLinearColor(0.35f, 0.31f, 0.45f), 0.58f);
     }
 
-    // Explicit start location above the floor. GameMode uses this when spawning the player.
-    FActorSpawnParameters StartParams;
-    StartParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    APlayerStart* PlayerStart = World->SpawnActor<APlayerStart>(
+    // Spawn point is 100 cm above the floor.
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    World->SpawnActor<APlayerStart>(
         APlayerStart::StaticClass(),
         FTransform(FRotator::ZeroRotator, FVector(0.0f, 0.0f, 100.0f)),
-        StartParams);
-    if (PlayerStart)
-    {
-    }
+        SpawnParams);
 
-    // Physically based sun and sky atmosphere.
+    // Atmosphere, warm directional sunlight, skylight and subtle distance haze.
     FActorSpawnParameters LightParams;
     LightParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    ASkyAtmosphere* Atmosphere = World->SpawnActor<ASkyAtmosphere>(
-        ASkyAtmosphere::StaticClass(), FTransform::Identity, LightParams);
-    if (Atmosphere)
-    {
-    }
+    World->SpawnActor<ASkyAtmosphere>(ASkyAtmosphere::StaticClass(), FTransform::Identity, LightParams);
 
     ADirectionalLight* Sun = World->SpawnActor<ADirectionalLight>(
         ADirectionalLight::StaticClass(),
