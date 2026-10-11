@@ -18,4 +18,10 @@ Arena generation lives in `Source/TestUE5/TestUE5GameMode.cpp`. See [Docs/TEST_A
 The character is still assembled from Unreal Engine basic cube and sphere meshes. It is not a finished realistic or skinned character. The next step for proper animation is importing a licensed skeletal arms mesh and wiring an Animation Blueprint. See [Docs/FIRST_PERSON_ANIMATION.md](Docs/FIRST_PERSON_ANIMATION.md).
 
 ## Build status
-The GitHub Actions workflow validates the source layout and uploads a source ZIP. Standard GitHub-hosted Windows runners do not include Unreal Engine, so this workflow cannot compile a playable `.exe` by itself. A real UE build requires an Unreal Engine installation available to the runner, typically a configured self-hosted Windows runner with UE 5.5 installed and licensed.
+- `.github/workflows/validate.yml` checks the source layout and uploads a source ZIP. It does **not** compile the game.
+- `.github/workflows/package-windows.yml` is a packaging workflow for a real Windows Shipping build. It runs only on manual dispatch and requires a Windows self-hosted GitHub Actions runner with **Unreal Engine 5.5 already installed** and the runner label `ue5-5.5`.
+- The runner may be a remote/cloud Windows machine, so Unreal Engine does not need to be installed on the developer's personal PC. However, this repository workflow does not provision that machine or install Unreal Engine automatically.
+- If UE 5.5 is installed in a custom directory, configure the runner's `UE_ROOT` environment variable or repository variable for the workflow's runner environment.
+- After the workflow completes successfully, the packaged game files (including the `.exe`) are uploaded as the `TestUE5-Windows-Shipping` artifact for 14 days.
+
+**Important:** the workflow file has been committed, but a runner has not been provisioned or tested from this repository yet. Therefore, no successful executable build is confirmed.
