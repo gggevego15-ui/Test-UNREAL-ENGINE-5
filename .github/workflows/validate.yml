@@ -1,0 +1,48 @@
+name: Validate UE5 prototype
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  validate-source:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate project files
+        shell: pwsh
+        run: |
+          $required = @(
+            'TestUE5.uproject',
+            'Source/TestUE5/TestUE5.Build.cs',
+            'Source/TestUE5/TestUE5.cpp',
+            'Source/TestUE5/FirstPersonTestCharacter.h',
+            'Source/TestUE5/FirstPersonTestCharacter.cpp',
+            'Source/TestUE5/TestUE5GameMode.h',
+            'Source/TestUE5/TestUE5GameMode.cpp',
+            'Config/DefaultInput.ini',
+            'Config/DefaultEngine.ini'
+          )
+          $missing = $required | Where-Object { -not (Test-Path $_) }
+          if ($missing) {
+            Write-Error "Missing required project files: $($missing -join ', ')"
+          }
+          $project = Get-Content 'TestUE5.uproject' -Raw | ConvertFrom-Json
+          if ($project.EngineAssociation -ne '5.5') {
+            Write-Error 'Unexpected Unreal Engine version in TestUE5.uproject'
+          }
+          Write-Host 'UE5 source structure validated. This runner does not include Unreal Engine, so this job does not compile a game executable.'
+
+      - name: Package source project
+        shell: pwsh
+        run: |
+          Compress-Archive -Path TestUE5.uproject, Source, Config -DestinationPath TestUE5-Source.zip -Force
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestUE5-Source
+          path: TestUE5-Source.zip
+          if-no-files-found: error
