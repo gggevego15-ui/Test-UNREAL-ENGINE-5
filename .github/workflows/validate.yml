@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate project files
+      - name: Validate project files and test arena configuration
         shell: pwsh
         run: |
           $required = @(
@@ -23,22 +23,38 @@ jobs:
             'Source/TestUE5/TestUE5GameMode.h',
             'Source/TestUE5/TestUE5GameMode.cpp',
             'Config/DefaultInput.ini',
-            'Config/DefaultEngine.ini'
+            'Config/DefaultEngine.ini',
+            'Docs/TEST_ARENA.md',
+            'Docs/FIRST_PERSON_ANIMATION.md'
           )
           $missing = $required | Where-Object { -not (Test-Path $_) }
           if ($missing) {
             Write-Error "Missing required project files: $($missing -join ', ')"
           }
+
           $project = Get-Content 'TestUE5.uproject' -Raw | ConvertFrom-Json
           if ($project.EngineAssociation -ne '5.5') {
             Write-Error 'Unexpected Unreal Engine version in TestUE5.uproject'
           }
-          Write-Host 'UE5 source structure validated. This runner does not include Unreal Engine, so this job does not compile a game executable.'
+
+          $gameMode = Get-Content 'Source/TestUE5/TestUE5GameMode.cpp' -Raw
+          foreach ($token in @('SpawnTestCube', 'APlayerStart', 'ADirectionalLight', 'ASkyAtmosphere', 'ASkyLight', 'AExponentialHeightFog')) {
+            if ($gameMode -notmatch [regex]::Escape($token)) {
+              Write-Error "Test arena source is missing expected element: $token"
+            }
+          }
+
+          $engineConfig = Get-Content 'Config/DefaultEngine.ini' -Raw
+          if ($engineConfig -notmatch 'GameDefaultMap=/Engine/Maps/Entry') {
+            Write-Error 'Expected built-in startup map is not configured'
+          }
+
+          Write-Host 'Project structure and test arena source checks passed. This runner does not include Unreal Engine, so this job does not compile a game executable.'
 
       - name: Package source project
         shell: pwsh
         run: |
-          Compress-Archive -Path TestUE5.uproject, Source, Config -DestinationPath TestUE5-Source.zip -Force
+          Compress-Archive -Path TestUE5.uproject, Source, Config, Docs -DestinationPath TestUE5-Source.zip -Force
 
       - name: Upload source artifact
         uses: actions/upload-artifact@v4
